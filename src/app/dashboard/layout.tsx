@@ -16,6 +16,10 @@ export default async function DashboardLayout({
     redirect('/auth/sign-in')
   }
 
+  if (!session?.user.role) {
+    redirect('/')
+  }
+
   return (
     <>
       <div className="flex flex-col h-full">

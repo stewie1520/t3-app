@@ -9,6 +9,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { pgDrizzleAdapter } from "./drizzle-adapter";
+import { type UserRole } from "../enums/user-role.enum";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -20,15 +21,9 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      role?: UserRole;
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -40,25 +35,12 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/auth/sign-in'
   },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
   callbacks: {
-    jwt: (jwtParams) => {
-      if (jwtParams?.user) {
-        jwtParams.token.user = jwtParams.user
-      }
-
-      return jwtParams.token;
-    },
-    session: ({ session, token }) => {
-      
+    session: ({ session, user }) => {
       return {
         ...session,
         user: {
-          ...session.user,
-          ...(token.user || {}),
+          ...(user || {}),
         }
       }
     }
@@ -69,6 +51,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: "login"
+        }
+      }
     }),
     GitHubProvider({
       clientId: env.GITHUB_CLIENT_ID,

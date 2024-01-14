@@ -12,7 +12,7 @@ interface ISignInButtonProps {
 export const SignInButton: FC<ISignInButtonProps> = ({ provider }) => {
   switch (provider.id) {
     case "google": 
-      return <GoogleLoginButton onClick={() => signIn("google", {  })}/>
+      return <GoogleLoginButton onClick={() => signIn("google")}/>
     case "github":
       return <GithubLoginButton onClick={() => signIn("github")}/>
   }

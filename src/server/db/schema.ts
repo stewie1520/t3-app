@@ -44,6 +44,7 @@ export const users = pgTable("user", {
     mode: "date",
   }).default(sql`CURRENT_TIMESTAMP(3)`),
   image: varchar("image", { length: 255 }),
+  role: varchar("role"),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -107,3 +108,25 @@ export const verificationTokens = pgTable(
     compoundKey: primaryKey(vt.identifier, vt.token),
   })
 );
+
+export const universities = pgTable("university", {
+  id: uuid("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  code: varchar("code", { length: 255 }).unique().notNull(),
+  address: varchar("address", { length: 255 }),
+  createdAt: timestamp("createdAt").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updatedAt"),
+})
+
+export const studentInfo = pgTable("studentInfo", {
+  id: uuid("id").primaryKey(),
+  userId: varchar("userId", { length: 255 }).notNull(),
+  universityId: varchar("universityId", { length: 255 }).notNull(), 
+  createdAt: timestamp("createdAt").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updatedAt"),
+})
+
+export const studentInfoRelations = relations(studentInfo, ({ one }) => ({
+  user: one(users, { fields: [studentInfo.userId], references: [users.id] }),
+  university: one(universities, { fields: [studentInfo.universityId], references: [universities.id] }),
+}))
